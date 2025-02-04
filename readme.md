@@ -70,6 +70,7 @@ Access the app at: **http://127.0.0.1:8000/**
 |--------|---------|-------------|
 | POST | `/api/token/` | Obtain JWT token |
 | POST | `/api/token/refresh/` | Refresh JWT token |
+| POST | `/api/register/` | User registration |
 
 ### **Doctors**
 | Method | Endpoint | Description |
@@ -117,6 +118,10 @@ gunicorn appointment_system.wsgi:application --bind 0.0.0.0:8000
 ```
 
 ---
+
+## License
+This project is licensed under the **MIT License**.
+
 ---
 
 ## Contribution
@@ -125,7 +130,7 @@ Feel free to open issues and pull requests to contribute to this project.
 ---
 
 ## Contact
-For inquiries, contact **asengondo@gmail.com**.
+For inquiries, contact **your_email@example.com**.
 
 Happy Coding! 🚀
 

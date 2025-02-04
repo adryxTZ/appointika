@@ -1,13 +1,21 @@
+from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from doctors.models import DoctorProfile
 from doctors.serializers.doctor import DoctorProfileSerializer
+from user.serializers.doctorRegistration import DoctorRegistrationSerializer
 
 
 # ---- Doctor View ----
 class DoctorView(APIView):
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [IsAdminUser()]
+        return [AllowAny()]  # Adjust permission for other methods if needed
+
     def get(self, request, pk=None):
         if pk:
             try:
@@ -30,11 +38,36 @@ class DoctorView(APIView):
             serializer = DoctorProfileSerializer(doctors, many=True)
             return Response(serializer.data)
 
+    # def post(self, request):
+    #     serializer = DoctorProfileSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def post(self, request):
-        serializer = DoctorProfileSerializer(data=request.data)
+        serializer = DoctorRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            user = serializer.save()
+
+            specialization = request.data['specialization']
+            experience = request.data['experience']
+            available_days = request.data['available_days']
+
+            # Create DoctorProfile
+            DoctorProfile.objects.create(
+                user=user,
+                specialization=specialization,
+                experience=experience,
+                available_days=available_days
+            )
+
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': serializer.data
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk=None):
@@ -56,4 +89,3 @@ class DoctorView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except DoctorProfile.DoesNotExist:
             return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
-

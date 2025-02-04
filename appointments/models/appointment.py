@@ -8,7 +8,7 @@ from user.models import User
 
 class Appointment(models.Model):
     patient = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'patient'})
-    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, blank=False, null=False)
     appointment_time = models.DateTimeField()
 
     APPOINTMENT_STATUS = [
